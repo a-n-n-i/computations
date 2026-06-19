@@ -1213,11 +1213,17 @@ def get_third_differential(critical_point,precision):
     return MM3
 #print(get_third_differential(5,100))
 
+
+
+
+
+
 # ============================================================================
 # Stratum Adjacency Detection: Corresponds to README if_adjacent_to_stratum
+# order 3
 # ============================================================================
 
-def if_adjacent_to_stratum(critical_point, curves_set,M1,M2,M3):
+def if_adjacent_to_stratum_3order(critical_point, curves_set,M1,M2,M3):
     """
     Check if a stratum is adjacent to the critical points B, M_9^1, M_5^1.
     
@@ -1266,6 +1272,45 @@ def if_adjacent_to_stratum(critical_point, curves_set,M1,M2,M3):
     v1=[x[i] for i in range(6)]
     v2=[x[i+6] for i in range(6)]
     v3=[x[i+12] for i in range(6)]
+    #-------------0.          2.         -0.5         0.54934206 -0.0942522  -0.87113918]
+    
+    m.addConstr(v1[0]==0/3)
+    m.addConstr(v1[1]==2/3)
+    m.addConstr(v1[2]== -0.5/3)
+    m.addConstr(v1[3]==0.54934206/3)
+    m.addConstr(v1[4]== -0.0942522/3)
+    m.addConstr(v1[5]==-0.87113918/3)
+    
+    #[ 1.          0.         -0.5         0.0942522  -0.54934206  0.22754493]
+    '''
+    m.addConstr(v1[0]==1/2)
+    m.addConstr(v1[1]==0/2)
+    m.addConstr(v1[2]== -0.5/2)
+    m.addConstr(v1[3]==0.0942522/2)
+    m.addConstr(v1[4]==-0.54934206/2)
+    m.addConstr(v1[5]==0.22754493/2)
+   '''
+    
+    # 0.73577196  0.52845607 -0.5         0.2144997  -0.42909455 -0.06275823
+    '''
+    m.addConstr(v1[0]==0.73577196/2)
+    m.addConstr(v1[1]==0.52845607/2)
+    m.addConstr(v1[2]== -0.5/2)
+    m.addConstr(v1[3]==0.2144997/2)
+    m.addConstr(v1[4]==-0.42909455/2)
+    m.addConstr(v1[5]==-0.06275823/2)
+    '''
+
+
+    #0.          2.         -0.5         0.54934206 -0.0942522  -0.87113918
+    m.addConstr(v1[0]==0/3)
+    m.addConstr(v1[1]==2/3)
+    m.addConstr(v1[2]== -0.5/3)
+    m.addConstr(v1[3]==0.54934206/3)
+    m.addConstr(v1[4]==-0.0942522/3)
+    m.addConstr(v1[5]==-0.87113918/3)
+
+
     m.setObjective(0, GRB.MINIMIZE)      
     for i in range(18):
         m.addConstr(x[i]>=-1, name ="qc1")
@@ -1322,6 +1367,10 @@ def if_adjacent_to_stratum(critical_point, curves_set,M1,M2,M3):
     for r in range(mm):
         a=dd1[r]*t+(1/2)*dd2[r]*t*t+(1/6)*dd3[r]*t*t*t
         Length_approxi.append(a)
+        
+    for i in range(len(LL)):
+        1
+        #m.addConstr(Length_approxi[LL[i]]<=0.000)
 
     for i in range(len(LL)-1):
         #print(LL[i+1])
@@ -1330,8 +1379,15 @@ def if_adjacent_to_stratum(critical_point, curves_set,M1,M2,M3):
         m.addConstr(Length_approxi[LL[i]]-Length_approxi[LL[i+1]]>=-epsilen)
 
     #---------------------------------------------
-    m.addConstr(np.dot(v1,D[:,LL[0]])<=0)
-    
+    m.addConstr(np.dot(v1,D[:,LL[0]])<=-0.0)
+    #m.addConstr(Length_approxi[LL[0]]<=-0.0001)
+    for i in range(len(LL1)):
+        #print(LL[i+1])
+        #print(np.dot(v1,D[:,LL[i]]))
+        m.addConstr(np.dot(v1,D[:,LL1[i]])>=np.dot(v1,D[:,LL[0]]))
+        m.addConstr(dd1[LL1[i]]>=dd1[LL[0]])
+        m.addConstr(dd2[LL1[i]]>=dd2[LL[0]])
+
     for i in range(len(LL1)):
         #print(LL[i+1])
         #print(np.dot(v1,D[:,LL[i]]))
@@ -1361,37 +1417,451 @@ def if_adjacent_to_stratum(critical_point, curves_set,M1,M2,M3):
         
     m.optimize()
     if m.status == GRB.OPTIMAL:
+        vv1=[x[i].X for i in range(6)]
+        print(vv1)
+        vv2=[x[6+i].X for i in range(6)]
+        vv3=[x[12+i].X for i in range(6)]
+        print(LL)
+        for r in range(12):
+            print(r)
+            print(np.dot(vv1,D[:,r]))
+            print(np.dot(vv2,D[:,r])+np.dot(np.dot(vv1,M2[r]),vv1))
+            bb=0       
+            for i in range(6):    
+                bb=bb+(1/6)*D[i][r]*vv3[i]
+            for i in range(6):
+                for j in range(6):
+                    bb=bb+(1/2)*M2[r][i][j]*vv1[i]*vv2[j]
+            for i in range(6):
+                for j in range(6):
+                    for kk in range(6):
+                        1
+                        #print(MM1[r][i,j,kk])
+                        bb=bb+(1/6)*M3[r][i][j][kk]*vv1[i]*vv1[j]*vv1[kk]
+            print(bb)
+        print("-----------------------------------------------")
         return 1
-        print("The system is feasible, the feasible point is ", [x[i].X for i in range(n)])
-        ''''''
-        '''a=0
-        for i in range(6):
-            a=a+vv1[i]**2
-        a=a**(1/2)
-        b=0
-        for i in range(6):
-            b=b+vv2[i]**2
-        b=b**(1/2)
-        
-    for i in range(6):
-            vv1[i]=vv1[i]/a
-    
-        for i in range(6):
-            vv2[i]=vv2[i]/b
-            
-        '''
-            
-        '''print("vv1",vv1)
-        print("vv2",vv2)
-        for i in range(12):
-        #print(LL[i+1])
-        #print(np.dot(v1,D[:,LL[i]]))'''
         
     elif m.status in (GRB.INFEASIBLE, GRB.INF_OR_UNBD):
         return 0
     else:
         return 0
 
-#print("end")
-#==========================================================
+
+
+# ============================================================================
+# Stratum Adjacency Detection: Corresponds to README if_adjacent_to_stratum
+# order 5
+# ============================================================================
+
+def if_adjacent_to_stratum_5order(critical_point, curves_set,M1,M2,M3,M4,M5):
+    """
+    Check if a stratum is adjacent to the critical points B, M_9^1, M_5^1.
+    
+    Uses Gurobi to solve a linear programming feasibility problem
+    involving first, second, and third derivatives.
+    
+    Args:
+        critical_point: Type of critical point (12, 9, or 5)
+        curves_set: List representing a subset of systoles C
+        M1, M2, M3: First, second, and third derivatives at critical points
+        
+    Returns:
+        1: Stratum is adjacent
+        0: Stratum is not adjacent
+    """
+    
+    mm=critical_point
+    D=np.zeros((6,mm))
+    for i in range(6):
+        for j in range(mm):
+            D[i][j]=M1[i][j] 
+    n = 30
+    if critical_point==12:
+        systoles=[1,2,3,4,5,6,7,8,9,10,11,12]
+    if critical_point==9:
+        systoles=[1,2,3,5,6,8,9,11,12]
+    if critical_point==5:
+        systoles=[1,2,5,7,11]
+
+    LL=[]
+    LL1=[]
+    for k in curves_set:
+        for i in range(len(systoles)):
+            if k==systoles[i]:
+                LL.append(i)
+    for i in range(len(systoles)):
+        if i not in LL:
+                LL1.append(i)
+    #print(LL)
+    #print(LL1)
+    m = Model("feas_qcqp")
+    m.setParam("OutputFlag", 0)         
+    x = m.addVars(n, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="x")
+    e = m.addVars(6, 6, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="eij")
+    h = m.addVars(6, 6, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="hij")
+    f = m.addVars(6, 6,6, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="fijk")
+    v1=[x[i] for i in range(6)]
+    v2=[x[i+6] for i in range(6)]
+    v3=[x[i+12] for i in range(6)]
+    v4=[x[i+18] for i in range(6)]
+    v5=[x[i+24] for i in range(6)]
+    # ---------- 0 目标（纯可行性） ----------
+    m.setObjective(0, GRB.MINIMIZE)      # 常数目标
+    for i in range(30):
+        m.addConstr(x[i]>=-1, name ="qc1")
+        m.addConstr(x[i]<=1, name ="qc1")
+    for i in range(6):
+        for j in range(6):
+            m.addConstr(e[i,j]==v1[i]*v1[j], name ="qc1")
+    for i in range(6):
+        for j in range(6):
+            for k in range(6):
+                m.addConstr(f[i,j,k]==v1[i]*e[j,k], name ="qc1")
+
+    for i in range(6):
+        for j in range(6):
+            m.addConstr(h[i,j]==v2[i]*v2[j], name ="qc1")
+
+    #-------------0.          2.         -0.5         0.54934206 -0.0942522  -0.87113918]
+    '''
+    m.addConstr(v1[0]==0/3)
+    m.addConstr(v1[1]==2/3)
+    m.addConstr(v1[2]== -0.5/3)
+    m.addConstr(v1[3]==0.54934206/3)
+    m.addConstr(v1[4]== -0.0942522/3)
+    m.addConstr(v1[5]==-0.87113918/3)
+    '''
+
+    #[ 1.          0.         -0.5         0.0942522  -0.54934206  0.22754493]
+    '''
+    m.addConstr(v1[0]==1/2)
+    m.addConstr(v1[1]==0/2)
+    m.addConstr(v1[2]== -0.5/2)
+    m.addConstr(v1[3]==0.0942522/2)
+    m.addConstr(v1[4]==-0.54934206/2)
+    m.addConstr(v1[5]==0.22754493/2)
+   '''
+    
+    # 0.73577196  0.52845607 -0.5         0.2144997  -0.42909455 -0.06275823
+    '''
+    m.addConstr(v1[0]==0.73577196/2)
+    m.addConstr(v1[1]==0.52845607/2)
+    m.addConstr(v1[2]== -0.5/2)
+    m.addConstr(v1[3]==0.2144997/2)
+    m.addConstr(v1[4]==-0.42909455/2)
+    m.addConstr(v1[5]==-0.06275823/2)
+    '''
+
+    '''
+    # [ 0.5         1.         -0.5         0.32179713 -0.32179713  0.13329273]
+    m.addConstr(v1[0]==0.5/2)
+    m.addConstr(v1[1]==1/2)
+    m.addConstr(v1[2]== -0.5/2)
+    m.addConstr(v1[3]==0.32179713/2)
+    m.addConstr(v1[4]==-0.32179713 /2)
+    m.addConstr(v1[5]==0.13329273/2)
+
+    '''
+
+    #[ 1.5         1.         -0.5        
+    # 0.32179713 -0.77688699  0.77688699]
+    '''
+    m.addConstr(v1[0]==1.5/3)
+    m.addConstr(v1[1]==1/3)
+    m.addConstr(v1[2]== -0.5/3)
+    m.addConstr(v1[3]==0.32179713/3)
+    m.addConstr(v1[4]==-0.77688699/3)
+    m.addConstr(v1[5]==0.77688699/3)
+    '''
+
+    '''
+    m.addConstr(v1[0]==1.5/3)
+    m.addConstr(v1[1]==1/3)
+    m.addConstr(v1[2]== -0.5/3)
+    m.addConstr(v1[3]==0.32179713/3)
+    m.addConstr(v1[4]==-0.77688699/3)
+    m.addConstr(v1[5]==0.77688699/3)
+        
+    '''
+    #0.          2.         -0.5         0.54934206 -0.0942522  -0.87113918
+    m.addConstr(v1[0]==0/3)
+    m.addConstr(v1[1]==2/3)
+    m.addConstr(v1[2]== -0.5/3)
+    m.addConstr(v1[3]==0.54934206/3)
+    m.addConstr(v1[4]==-0.0942522/3)
+    m.addConstr(v1[5]==-0.87113918/3)
+
+
+
+    m.setObjective(0, GRB.MINIMIZE)
+    for i in range(30):
+        m.addConstr(x[i]>=-1, name ="qc1")
+        m.addConstr(x[i]<=1, name ="qc1")
+    for i in range(6):
+        for j in range(6):
+            m.addConstr(e[i,j]==v1[i]*v1[j], name ="qc1")
+
+
+
+    dd5=[]
+    for r in range(12):
+        bb=0
+        for i in range(6):
+            bb=bb+D[i][r]*v5[i]
+        for i in range(6):
+            for j in range(6):
+                bb=bb+10*M2[r][i][j]*v2[i]*v3[j]+5*M2[r][i][j]*v1[i]*v4[j]
+                
+        for i in range(6):
+            for j in range(6):
+                for k in range(6):                   
+                    bb=bb+10*M3[r][i][j][k]*v1[i]*h[j,k]+15*M3[r][i][j][k]*v3[i]*e[j,k]
+        for i in range(6):
+            for j in range(6):
+                for k in range(6):   
+                    for l in range(6):
+                        bb=bb+10*M4[r][i][j][k][l]*f[i,j,k]*v2[l]     
+
+        for i in range(6):
+            for j in range(6):
+                for k in range(6):   
+                    for l in range(6):
+                        for m3 in range(6):
+                            bb=bb+M5[r][i][j][k][l][m3]*f[i,j,k]*e[l,m3]
+        dd5.append(bb)
+
+    dd4=[]
+    for r in range(12):
+        bb=0
+        for i in range(6):
+            bb=bb+D[i][r]*v4[i]
+
+        for i in range(6):
+            for j in range(6):
+                bb=bb+4*M2[r][i][j]*v1[i]*v3[j]+3*M2[r][i][j]*v2[i]*v2[j]
+        for i in range(6):
+            for j in range(6):
+                for kk in range(6):                   
+                    bb=bb+6*M3[r][i][j][kk]*e[i,j]*v2[kk]
+        for i in range(6):
+            for j in range(6):
+                for kk in range(6):   
+                    for m3 in range(6):
+                        bb=bb+M4[r][i][j][kk][m3]*e[i,j]*e[kk,m3]       
+        dd4.append(bb)
+    dd3=[]
+    for r in range(mm):
+        bb=0
+        for i in range(6):
+            bb=bb+D[i][r]*v3[i]
+
+        for i in range(6):
+            for j in range(6):
+                bb=bb+3*M2[r][i][j]*v1[i]*v2[j]
+        for i in range(6):
+            for j in range(6):
+                for kk in range(6):                   
+                    bb=bb+M3[r][i][j][kk]*e[i,j]*v1[kk]
+        dd3.append(bb)
+
+    dd1=[]
+    for r in range(mm):
+        bb=0
+        for i in range(6):
+            bb=bb+D[i][r]*v1[i]
+        dd1.append(bb)
+
+    dd2=[]
+    for r in range(mm):
+        bb=0
+        for i in range(6):
+            bb=bb+D[i][r]*v2[i]
+        for i in range(6):
+            for j in range(6):
+                bb=bb+M2[r][i][j]*v1[i]*v1[j]
+        dd2.append(bb)
+    Length_approxi=[]
+    t=0.1
+    epsilen=1e-8
+
+	
+    m.setParam('MIPGap', 1e-8)
+    
+    
+    m.setParam('OptimalityTol', 1e-8)
+    
+    m.setParam('FeasibilityTol', 1e-8)
+    
+    m.setParam('IntFeasTol', 1e-8)
+    
+    for r in range(mm):
+        a=dd1[r]*t+(1/2)*dd2[r]*t*t+(1/6)*dd3[r]*t*t*t+(1/24)*dd4[r]*t*t*t*t+(1/120)*dd5[r]*t*t*t*t*t
+        Length_approxi.append(a)
+        
+    for i in range(len(LL)):
+        1
+        #m.addConstr(Length_approxi[LL[i]]<=0.000)
+
+    for i in range(len(LL)-1):
+        m.addConstr(Length_approxi[LL[i]]-Length_approxi[LL[i+1]]<=epsilen)
+        m.addConstr(Length_approxi[LL[i]]-Length_approxi[LL[i+1]]>=-epsilen)
+
+    #---------------------------------------------
+    m.addConstr(np.dot(v1,D[:,LL[0]])<=-0.0)
+    #m.addConstr(Length_approxi[LL[0]]<=-0.0001)
+    for i in range(len(LL1)):
+        #print(LL[i+1])
+        #print(np.dot(v1,D[:,LL[i]]))
+        m.addConstr(np.dot(v1,D[:,LL1[i]])>=np.dot(v1,D[:,LL[0]]))
+        m.addConstr(dd1[LL1[i]]>=dd1[LL[0]])
+        m.addConstr(dd2[LL1[i]]>=dd2[LL[0]])
+        #m.addConstr(dd3[LL1[i]]>=dd3[LL[0]])
+        #m.addConstr(dd4[LL1[i]]>=dd4[LL[0]])  
+
+    for i in range(len(LL1)):
+        #print(LL[i+1])
+        #print(np.dot(v1,D[:,LL[i]]))
+        1
+        #
+        m.addConstr(Length_approxi[LL1[i]]>=0.00001+Length_approxi[LL[0]])
+    
+    
+ 
+    for i in range(len(LL1)):
+        #print(LL[i+1])
+        #print(np.dot(v1,D[:,LL[i]]))
+        m.addConstr(np.dot(v1,D[:,LL1[i]])>=np.dot(v1,D[:,LL[0]]))
+    #------------------------------------------------------------------------
+    for i in range(len(LL)-1):
+        m.addConstr(dd5[LL[i]]-dd5[LL[i+1]]<=epsilen)
+        m.addConstr(dd5[LL[i]]-dd5[LL[i+1]]>=-epsilen)
+    for i in range(len(LL)-1):
+        m.addConstr(dd4[LL[i]]-dd4[LL[i+1]]<=epsilen)
+        m.addConstr(dd4[LL[i]]-dd4[LL[i+1]]>=-epsilen)
+    for i in range(len(LL)-1):
+        m.addConstr(dd3[LL[i]]-dd3[LL[i+1]]<=epsilen)
+        m.addConstr(dd3[LL[i]]-dd3[LL[i+1]]>=-epsilen)
+
+    for i in range(len(LL)-1):
+        m.addConstr(dd2[LL[i]]-dd2[LL[i+1]]<=epsilen)
+        m.addConstr(dd2[LL[i]]-dd2[LL[i+1]]>=-epsilen)
+
+    for i in range(len(LL)-1):
+        m.addConstr(dd1[LL[i]]-dd1[LL[i+1]]<=epsilen)
+        m.addConstr(dd1[LL[i]]-dd1[LL[i+1]]>=-epsilen)
+        
+    m.optimize()
+    if m.status == GRB.OPTIMAL:
+        vv1=[x[i].X for i in range(6)]
+        print(vv1)
+        vv2=[x[6+i].X for i in range(6)]
+        vv3=[x[12+i].X for i in range(6)]
+        vv4=[x[18+i].X for i in range(6)]
+        vv5=[x[24+i].X for i in range(6)]
+        print(LL)
+        for r in range(12):
+            print(r)
+            print(np.dot(vv1,D[:,r]))
+            print(np.dot(vv2,D[:,r])+np.dot(np.dot(vv1,M2[r]),vv1))
+            bb=0       
+            for i in range(6):    
+                bb=bb+(1/6)*D[i][r]*vv3[i]
+            for i in range(6):
+                for j in range(6):
+                    bb=bb+(1/2)*M2[r][i][j]*vv1[i]*vv2[j]
+            for i in range(6):
+                for j in range(6):
+                    for kk in range(6):
+                        1
+                        #print(MM1[r][i,j,kk])
+                        bb=bb+(1/6)*M3[r][i][j][kk]*vv1[i]*vv1[j]*vv1[kk]
+            print(bb)
+
+            bb=0
+            for i in range(6):
+                bb=bb+D[i][r]*vv4[i]
+            for i in range(6):
+                for j in range(6):
+                    bb=bb+4*M2[r][i][j]*vv1[i]*vv3[j]+3*M2[r][i][j]*vv2[i]*vv2[j]
+            for i in range(6):
+                for j in range(6):
+                    for kk in range(6):                   
+                        bb=bb+6*M3[r][i][j][kk]*vv1[i]*vv1[j]*vv2[kk]
+            for i in range(6):
+                for j in range(6):
+                    for kk in range(6):   
+                        for mm in range(6):
+                            bb=bb+M4[r][i][j][kk][mm]*vv1[i]*vv1[j]*vv1[kk]*vv1[mm]
+
+            print(bb)
+
+            
+            bb=0
+            for i in range(6):
+                bb=bb+D[i][r]*vv5[i]
+    
+            for i in range(6):
+                for j in range(6):
+                    bb=bb+10*M2[r][i][j]*vv2[i]*vv3[j]+5*M2[r][i][j]*vv1[i]*vv4[j]
+                    
+            for i in range(6):
+                for j in range(6):
+                    for k in range(6):                   
+                        bb=bb+10*M3[r][i][j][k]*vv1[i]*vv2[j]*vv2[k]+15*M3[r][i][j][k]*vv3[i]*vv1[j]*vv1[k]
+            for i in range(6):
+                for j in range(6):
+                    for k in range(6):   
+                        for l in range(6):
+                            bb=bb+10*M4[r][i][j][k][l]*vv1[i]*vv1[j]*vv1[k]*vv2[l]     
+    
+            for i in range(6):
+                for j in range(6):
+                    for k in range(6):   
+                        for l in range(6):
+                            for mm in range(6):
+                                bb=bb+M5[r][i][j][k][l][mm]*vv1[i]*vv1[j]*vv1[k]*vv1[l]*vv1[mm]
+
+            print(bb)
+        print("-----------------------------------------------")
+        return 1
+        
+    elif m.status in (GRB.INFEASIBLE, GRB.INF_OR_UNBD):
+        return 0
+    else:
+        return 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
