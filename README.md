@@ -219,7 +219,7 @@ print(if_in_a_minima(diff_matrix, curves_set))
 ### 7. if_adjacent_to_stratum
 check if a stratum is adjacent to the critical points $B, M_9^1, M_5^1$ using third derivatives. 
 ```sh
-if_adjacent_to_stratum(critical_point, curves_set,M1,M2,M3)
+if_adjacent_to_stratum_3order(critical_point, curves_set,M1,M2,M3)
 #critical_point: int, choices are 12, 9, or 5.
 #curves_set is a list representing a subset of C
 # M1, M2, M3 are the first, second, and third derivatives of the systole length function at critical points.
